@@ -114,6 +114,11 @@ function love.load()
     -- 3. 'play' (the ball is in play, bouncing between paddles)
     -- 4. 'done' (the game is over, with a victor, ready for restart)
     gameState = 'start'
+    
+    --** Hit state where when a player hit a ball this var will turn true, so after it hit the ball it will stop moving
+    --** Right now its true so it will not move during the start page
+    hit1 = true
+    hit2 = true
 end
 
 --[[
@@ -140,8 +145,14 @@ function love.update(dt)
         -- on player who last scored
         ball.dy = math.random(-50, 50)
         if servingPlayer == 1 then
+            --** Reset hit so the serving player won't move
+            hit1 = true
+            hit2 = false
             ball.dx = math.random(140, 200)
         else
+            --** Reset hit so the serving player won't move
+            hit1 = false
+            hit2 = true
             ball.dx = -math.random(140, 200)
         end
     elseif gameState == 'play' then
@@ -151,8 +162,9 @@ function love.update(dt)
         if ball:collides(player1) then
             ball.dx = -ball.dx * 1.03
             ball.x = player1.x + 5
-            --!
+            --**Change player 1 hit to true so it will stop moving after hitting the ball
             hit1 = true
+            --** Change player 2 hit to false so it will move and chase the ball
             hit2 = false
 
             -- keep velocity going in the same direction, but randomize it
@@ -167,8 +179,9 @@ function love.update(dt)
         if ball:collides(player2) then
             ball.dx = -ball.dx * 1.03
             ball.x = player2.x - 4
-            --!
+            --** Turn player 1 hit to false so it will chase the ball
             hit1 = false
+            --** Turn player 2 hit to true so paddle will stop moving
             hit2 = true
 
             -- keep velocity going in the same direction, but randomize it
@@ -199,7 +212,6 @@ function love.update(dt)
         -- if we reach the left edge of the screen, go back to serve
         -- and update the score and serving player
         if ball.x < 0 then
-            hit2 = false
             servingPlayer = 1
             player2Score = player2Score + 1
             sounds['score']:play()
@@ -219,7 +231,6 @@ function love.update(dt)
         -- if we reach the right edge of the screen, go back to serve
         -- and update the score and serving player
         if ball.x > VIRTUAL_WIDTH then
-            hit1 = false
             servingPlayer = 2
             player1Score = player1Score + 1
             sounds['score']:play()
@@ -242,35 +253,37 @@ function love.update(dt)
     --
     -- player 1
     if hit1 then
+        --** Stop paddle movement after player 1 hit ball
         player1.dy = 0
     else
+        --** Only move paddle when ball cross halfway point of screen
         if ball.x < VIRTUAL_WIDTH / 2 then
-            if ball.y < player1.y then
+            --** Paddle will follow the ball to try and hit it. [+ 10] so the paddle will try to hit it from the middle of the paddle instead of only its top.
+            if ball.y < player1.y + 10 then
                 player1.dy = -PADDLE_SPEED
-            elseif ball.y > player1.y then
+            elseif ball.y > player1.y + 10 then
                 player1.dy = PADDLE_SPEED
             else
                 player1.dy = 0
             end
-        else
-            player1.dy = 0
         end
     end
 
     -- player 2
     if hit2 then
+        --** Stop paddle movement after player 2 hit ball
         player2.dy = 0
     else
+        --** Paddle will start to move after ball crosses halfway point of screen
         if ball.x > VIRTUAL_WIDTH / 2 then
-            if ball.y < player2.y then
+            --** Paddle will follow the ball to try and hit it. [+ 10] so the paddle will try to hit it from the middle of the paddle instead of only its top.
+            if ball.y < player2.y + 10 then
                 player2.dy = -PADDLE_SPEED
             elseif ball.y > player2.y then
                 player2.dy = PADDLE_SPEED
             else
                 player2.dy = 0
             end
-        else
-            player2.dy = 0
         end
     end
 
