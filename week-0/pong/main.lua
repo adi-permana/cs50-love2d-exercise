@@ -279,7 +279,7 @@ function love.update(dt)
             --** Paddle will follow the ball to try and hit it. [+ 10] so the paddle will try to hit it from the middle of the paddle instead of only its top.
             if ball.y < player2.y + 10 then
                 player2.dy = -PADDLE_SPEED
-            elseif ball.y > player2.y then
+            elseif ball.y > player2.y + 10 then
                 player2.dy = PADDLE_SPEED
             else
                 player2.dy = 0
